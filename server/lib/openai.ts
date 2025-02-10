@@ -17,10 +17,15 @@ export async function generateLinkedInPost(
       messages: [
         {
           role: "system",
-          content: `You are a professional content writer specializing in LinkedIn posts. Your task is to:
-1. Create a concise summary of the article
-2. Generate an engaging LinkedIn post based on that summary
-Use a ${tone} tone for both outputs.`
+          content: `You are a professional content writer specializing in LinkedIn posts. Follow this exact format in your response:
+
+[SUMMARY]
+Write a concise summary of the article here in ${tone} tone.
+[/SUMMARY]
+
+[LINKEDIN_POST]
+Write an engaging LinkedIn post based on that summary in ${tone} tone.
+[/LINKEDIN_POST]`
         },
         {
           role: "user",
@@ -34,45 +39,22 @@ Use a ${tone} tone for both outputs.`
       throw new Error("No content received from OpenAI");
     }
 
-    try {
-      // Try to parse as JSON first
-      const parsedResponse = JSON.parse(responseContent) as GenerateResponse;
-      if (!parsedResponse.summary || !parsedResponse.linkedinPost) {
-        throw new Error("Invalid response format");
-      }
-      return parsedResponse;
-    } catch (parseError) {
-      // If JSON parsing fails, try to extract summary and post from text
-      const lines = responseContent.split('\n');
-      let summary = '';
-      let linkedinPost = '';
-      let currentSection = '';
+    console.log("OpenAI Response:", responseContent); // Debug log
 
-      for (const line of lines) {
-        if (line.toLowerCase().includes('summary:')) {
-          currentSection = 'summary';
-          continue;
-        } else if (line.toLowerCase().includes('linkedin post:')) {
-          currentSection = 'linkedinPost';
-          continue;
-        }
+    // Extract summary
+    const summaryMatch = responseContent.match(/\[SUMMARY\]([\s\S]*?)\[\/SUMMARY\]/);
+    const summary = summaryMatch ? summaryMatch[1].trim() : '';
 
-        if (currentSection === 'summary') {
-          summary += line + '\n';
-        } else if (currentSection === 'linkedinPost') {
-          linkedinPost += line + '\n';
-        }
-      }
+    // Extract LinkedIn post
+    const linkedinMatch = responseContent.match(/\[LINKEDIN_POST\]([\s\S]*?)\[\/LINKEDIN_POST\]/);
+    const linkedinPost = linkedinMatch ? linkedinMatch[1].trim() : '';
 
-      summary = summary.trim();
-      linkedinPost = linkedinPost.trim();
-
-      if (!summary || !linkedinPost) {
-        throw new Error("Could not extract summary and LinkedIn post from response");
-      }
-
-      return { summary, linkedinPost };
+    if (!summary || !linkedinPost) {
+      console.error('Parsing failed. Response content:', responseContent);
+      throw new Error("Could not extract summary and LinkedIn post from response");
     }
+
+    return { summary, linkedinPost };
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
     console.error('OpenAI API Error:', error);
