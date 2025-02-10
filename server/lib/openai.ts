@@ -2,14 +2,18 @@ import OpenAI from "openai";
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-// the newest OpenAI model is "gpt-4o" which was released May 13, 2024
+interface GenerateResponse {
+  summary: string;
+  linkedinPost: string;
+}
+
 export async function generateLinkedInPost(
   content: string,
   tone: string
-): Promise<{ summary: string; linkedinPost: string }> {
+): Promise<GenerateResponse> {
   try {
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o",
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4",
       messages: [
         {
           role: "system",
@@ -17,18 +21,23 @@ export async function generateLinkedInPost(
         },
         {
           role: "user",
-          content: content,
+          content,
         },
       ],
       response_format: { type: "json_object" },
     });
 
-    const content = response.choices[0].message.content;
-    if (!content) {
+    const responseContent = completion.choices[0]?.message?.content;
+    if (!responseContent) {
       throw new Error("No content received from OpenAI");
     }
 
-    return JSON.parse(content);
+    const parsedResponse = JSON.parse(responseContent) as GenerateResponse;
+    if (!parsedResponse.summary || !parsedResponse.linkedinPost) {
+      throw new Error("Invalid response format from OpenAI");
+    }
+
+    return parsedResponse;
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
     throw new Error(`Failed to generate LinkedIn post: ${errorMessage}`);
