@@ -17,14 +17,17 @@ export async function generateLinkedInPost(
       messages: [
         {
           role: "system",
-          content: `You are a professional content writer specializing in LinkedIn posts. Generate a concise summary and an engaging LinkedIn post in ${tone} tone. Output in JSON format with 'summary' and 'linkedinPost' fields.`,
+          content: `You are a professional content writer specializing in LinkedIn posts. Generate a concise summary and an engaging LinkedIn post in ${tone} tone. Format your response as a valid JSON object with exactly these fields:
+{
+  "summary": "your summary here",
+  "linkedinPost": "your LinkedIn post here"
+}`,
         },
         {
           role: "user",
           content,
         },
       ],
-      response_format: { type: "json_object" },
     });
 
     const responseContent = completion.choices[0]?.message?.content;
