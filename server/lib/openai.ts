@@ -39,13 +39,11 @@ Write an engaging LinkedIn post based on that summary in ${tone} tone.
       throw new Error("No content received from OpenAI");
     }
 
-    console.log("OpenAI Response:", responseContent); // Debug log
-
-    // Extract summary
+    // Extract summary using more precise regex
     const summaryMatch = responseContent.match(/\[SUMMARY\]([\s\S]*?)\[\/SUMMARY\]/);
     const summary = summaryMatch ? summaryMatch[1].trim() : '';
 
-    // Extract LinkedIn post
+    // Extract LinkedIn post using more precise regex
     const linkedinMatch = responseContent.match(/\[LINKEDIN_POST\]([\s\S]*?)\[\/LINKEDIN_POST\]/);
     const linkedinPost = linkedinMatch ? linkedinMatch[1].trim() : '';
 
