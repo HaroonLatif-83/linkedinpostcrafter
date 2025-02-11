@@ -1,8 +1,10 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Copy } from "lucide-react";
+import { Copy, Edit2, Save } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { type Article } from "@shared/schema";
+import { useState } from "react";
+import { Textarea } from "@/components/ui/textarea";
 
 interface ResultCardProps {
   article: Article;
@@ -10,12 +12,22 @@ interface ResultCardProps {
 
 export default function ResultCard({ article }: ResultCardProps) {
   const { toast } = useToast();
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedPost, setEditedPost] = useState(article.linkedinPost);
 
   const copyToClipboard = async (text: string) => {
     await navigator.clipboard.writeText(text);
     toast({
       title: "Copied!",
       description: "Text copied to clipboard",
+    });
+  };
+
+  const handleSave = () => {
+    setIsEditing(false);
+    toast({
+      title: "Saved!",
+      description: "Your changes have been saved",
     });
   };
 
@@ -44,18 +56,51 @@ export default function ResultCard({ article }: ResultCardProps) {
             <h2 className="text-lg font-semibold text-[#191919]">
               LinkedIn Post
             </h2>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => copyToClipboard(article.linkedinPost)}
-            >
-              <Copy className="w-4 h-4 mr-2" />
-              Copy
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  if (isEditing) {
+                    handleSave();
+                  } else {
+                    setIsEditing(true);
+                  }
+                }}
+              >
+                {isEditing ? (
+                  <>
+                    <Save className="w-4 h-4 mr-2" />
+                    Save
+                  </>
+                ) : (
+                  <>
+                    <Edit2 className="w-4 h-4 mr-2" />
+                    Edit
+                  </>
+                )}
+              </Button>
+              {!isEditing && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => copyToClipboard(editedPost)}
+                >
+                  <Copy className="w-4 h-4 mr-2" />
+                  Copy
+                </Button>
+              )}
+            </div>
           </div>
-          <p className="text-[#191919] whitespace-pre-wrap">
-            {article.linkedinPost}
-          </p>
+          {isEditing ? (
+            <Textarea
+              value={editedPost}
+              onChange={(e) => setEditedPost(e.target.value)}
+              className="min-h-[200px] text-[#191919]"
+            />
+          ) : (
+            <p className="text-[#191919] whitespace-pre-wrap">{editedPost}</p>
+          )}
         </CardContent>
       </Card>
     </div>
