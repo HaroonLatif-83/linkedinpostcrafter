@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Copy, Edit2, Save, Wand2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { type Article } from "@shared/schema";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { apiRequest } from "@/lib/queryClient";
 
@@ -16,6 +16,12 @@ export default function ResultCard({ article }: ResultCardProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedPost, setEditedPost] = useState(article.linkedinPost);
   const [isPolishing, setIsPolishing] = useState(false);
+  const [glowEffect, setGlowEffect] = useState(false);
+
+  const triggerGlowEffect = () => {
+    setGlowEffect(true);
+    setTimeout(() => setGlowEffect(false), 2000);
+  };
 
   const copyToClipboard = async (text: string) => {
     await navigator.clipboard.writeText(text);
@@ -27,6 +33,7 @@ export default function ResultCard({ article }: ResultCardProps) {
 
   const handleSave = () => {
     setIsEditing(false);
+    triggerGlowEffect();
     toast({
       title: "Saved!",
       description: "Your changes have been saved",
@@ -39,6 +46,7 @@ export default function ResultCard({ article }: ResultCardProps) {
       const res = await apiRequest("POST", "/api/polish", { text: editedPost });
       const data = await res.json();
       setEditedPost(data.polishedPost);
+      triggerGlowEffect();
       toast({
         title: "Text Polished!",
         description: "Your LinkedIn post has been refined and improved",
@@ -53,6 +61,13 @@ export default function ResultCard({ article }: ResultCardProps) {
       setIsPolishing(false);
     }
   };
+
+  // Trigger glow effect when initial post is loaded
+  useEffect(() => {
+    if (article.linkedinPost) {
+      triggerGlowEffect();
+    }
+  }, [article.linkedinPost]);
 
   return (
     <div className="space-y-4">
@@ -73,7 +88,7 @@ export default function ResultCard({ article }: ResultCardProps) {
         </CardContent>
       </Card>
 
-      <Card className="border-none shadow-sm">
+      <Card className={`border-none shadow-sm transition-all ${glowEffect ? 'glow-success' : ''}`}>
         <CardContent className="pt-6">
           <div className="flex justify-between items-start mb-4">
             <h2 className="text-lg font-semibold text-[#191919]">
