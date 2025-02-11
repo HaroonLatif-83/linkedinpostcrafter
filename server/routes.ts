@@ -13,8 +13,8 @@ export function registerRoutes(app: Express) {
       console.log('Scraping article from URL:', body.url);
       const content = await scrapeArticle(body.url);
 
-      console.log('Generating LinkedIn post with tone:', body.tone);
-      const { summary, linkedinPost } = await generateLinkedInPost(content, body.tone);
+      console.log('Generating LinkedIn post with tone:', body.tone, 'and length:', body.length);
+      const { summary, linkedinPost } = await generateLinkedInPost(content, body.tone, body.length);
 
       console.log('Creating article in storage');
       const article = await storage.createArticle({

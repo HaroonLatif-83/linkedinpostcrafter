@@ -9,10 +9,11 @@ interface GenerateResponse {
 
 export async function generateLinkedInPost(
   content: string,
-  tone: string
+  tone: string,
+  length: string = "medium"
 ): Promise<GenerateResponse> {
   try {
-    console.log('Generating content with tone:', tone);
+    console.log('Generating content with tone:', tone, 'and length:', length);
     console.log('Content length:', content.length);
 
     const completion = await openai.chat.completions.create({
@@ -23,7 +24,7 @@ export async function generateLinkedInPost(
           content: `You are a professional content writer specializing in LinkedIn posts. Format your response as a JSON object with exactly these two fields:
 {
   "summary": "a concise summary of the article in ${tone} tone",
-  "linkedinPost": "an engaging LinkedIn post based on that summary in ${tone} tone"
+  "linkedinPost": "an engaging LinkedIn post based on that summary in ${tone} tone. Make it ${length} length (short: ~100 words, medium: ~200 words)"
 }
 Ensure your response is a valid JSON object.`
         },

@@ -1,6 +1,6 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { insertArticleSchema, type InsertArticle, toneOptions } from "@shared/schema";
+import { insertArticleSchema, type InsertArticle, toneOptions, lengthOptions } from "@shared/schema";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -21,6 +21,7 @@ export default function ArticleForm({ onSuccess }: ArticleFormProps) {
     defaultValues: {
       url: "",
       tone: "Professional",
+      length: "medium",
     },
   });
 
@@ -68,33 +69,63 @@ export default function ArticleForm({ onSuccess }: ArticleFormProps) {
           )}
         />
 
-        <FormField
-          control={form.control}
-          name="tone"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Tone</FormLabel>
-              <Select
-                onValueChange={field.onChange}
-                defaultValue={field.value}
-              >
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a tone" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {toneOptions.map((tone) => (
-                    <SelectItem key={tone} value={tone}>
-                      {tone}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="tone"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Tone</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a tone" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {toneOptions.map((tone) => (
+                      <SelectItem key={tone} value={tone}>
+                        {tone}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="length"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Post Length</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select length" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {lengthOptions.map((length) => (
+                      <SelectItem key={length} value={length}>
+                        {length.charAt(0).toUpperCase() + length.slice(1)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
         <Button
           type="submit"
