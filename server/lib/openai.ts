@@ -24,7 +24,7 @@ export async function generateLinkedInPost(
           content: `You are a professional content writer specializing in LinkedIn posts. Format your response as a JSON object with exactly these two fields:
 {
   "summary": "a concise summary of the article in ${tone} tone",
-  "linkedinPost": "an engaging LinkedIn post based on that summary in ${tone} tone. Make it ${length} length (short: ~100 words, medium: ~200 words)"
+  "linkedinPost": "an engaging LinkedIn post based on that summary in ${tone} tone. Make it ${length} length (short: ~50 words max for a snappy post, medium: ~200 words)"
 }
 Ensure your response is a valid JSON object.`
         },
