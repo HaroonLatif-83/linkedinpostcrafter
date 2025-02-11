@@ -88,7 +88,7 @@ export default function ResultCard({ article }: ResultCardProps) {
         </CardContent>
       </Card>
 
-      <Card className={`border-none shadow-sm transition-all ${glowEffect ? 'glow-success' : ''}`}>
+      <Card className={`border-none shadow-sm transition-all duration-300 bg-white ${glowEffect ? 'glow-success' : ''}`}>
         <CardContent className="pt-6">
           <div className="flex justify-between items-start mb-4">
             <h2 className="text-lg font-semibold text-[#191919]">
