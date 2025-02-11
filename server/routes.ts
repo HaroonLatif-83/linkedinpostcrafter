@@ -3,7 +3,8 @@ import { createServer } from "http";
 import { storage } from "./storage";
 import { insertArticleSchema } from "@shared/schema";
 import { scrapeArticle } from "./lib/scraper";
-import { generateLinkedInPost } from "./lib/openai";
+import { generateLinkedInPost, polishLinkedInPost } from "./lib/openai";
+import { z } from "zod";
 
 export function registerRoutes(app: Express) {
   app.post("/api/articles", async (req, res) => {
@@ -28,6 +29,24 @@ export function registerRoutes(app: Express) {
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
       console.error('Error processing article:', errorMessage);
+      res.status(400).json({ message: errorMessage });
+    }
+  });
+
+  app.post("/api/polish", async (req, res) => {
+    try {
+      const schema = z.object({
+        text: z.string().min(1, "Text is required"),
+      });
+
+      const body = schema.parse(req.body);
+      console.log('Polishing LinkedIn post');
+
+      const { polishedPost } = await polishLinkedInPost(body.text);
+      res.json({ polishedPost });
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      console.error('Error polishing text:', errorMessage);
       res.status(400).json({ message: errorMessage });
     }
   });

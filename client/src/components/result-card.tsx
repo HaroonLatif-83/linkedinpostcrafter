@@ -1,10 +1,11 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Copy, Edit2, Save } from "lucide-react";
+import { Copy, Edit2, Save, Wand2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { type Article } from "@shared/schema";
 import { useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
+import { apiRequest } from "@/lib/queryClient";
 
 interface ResultCardProps {
   article: Article;
@@ -14,6 +15,7 @@ export default function ResultCard({ article }: ResultCardProps) {
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [editedPost, setEditedPost] = useState(article.linkedinPost);
+  const [isPolishing, setIsPolishing] = useState(false);
 
   const copyToClipboard = async (text: string) => {
     await navigator.clipboard.writeText(text);
@@ -29,6 +31,27 @@ export default function ResultCard({ article }: ResultCardProps) {
       title: "Saved!",
       description: "Your changes have been saved",
     });
+  };
+
+  const handlePolish = async () => {
+    try {
+      setIsPolishing(true);
+      const res = await apiRequest("POST", "/api/polish", { text: editedPost });
+      const data = await res.json();
+      setEditedPost(data.polishedPost);
+      toast({
+        title: "Text Polished!",
+        description: "Your LinkedIn post has been refined and improved",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to polish text",
+        variant: "destructive",
+      });
+    } finally {
+      setIsPolishing(false);
+    }
   };
 
   return (
@@ -57,6 +80,15 @@ export default function ResultCard({ article }: ResultCardProps) {
               LinkedIn Post
             </h2>
             <div className="flex gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handlePolish}
+                disabled={isPolishing || isEditing}
+              >
+                <Wand2 className="w-4 h-4 mr-2" />
+                {isPolishing ? "Polishing..." : "Polish"}
+              </Button>
               <Button
                 variant="ghost"
                 size="sm"
