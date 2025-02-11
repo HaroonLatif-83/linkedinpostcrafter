@@ -12,6 +12,9 @@ export async function generateLinkedInPost(
   tone: string
 ): Promise<GenerateResponse> {
   try {
+    console.log('Generating content with tone:', tone);
+    console.log('Content length:', content.length);
+
     const completion = await openai.chat.completions.create({
       model: "gpt-4-turbo-preview",
       messages: [
