@@ -17,21 +17,19 @@ export async function generateLinkedInPost(
       messages: [
         {
           role: "system",
-          content: `You are a professional content writer specializing in LinkedIn posts. Follow this exact format in your response:
-
-[SUMMARY]
-Write a concise summary of the article here in ${tone} tone.
-[/SUMMARY]
-
-[LINKEDIN_POST]
-Write an engaging LinkedIn post based on that summary in ${tone} tone.
-[/LINKEDIN_POST]`
+          content: `You are a professional content writer specializing in LinkedIn posts. Format your response as a JSON object with exactly these two fields:
+{
+  "summary": "a concise summary of the article in ${tone} tone",
+  "linkedinPost": "an engaging LinkedIn post based on that summary in ${tone} tone"
+}
+Ensure your response is a valid JSON object.`
         },
         {
           role: "user",
           content,
         },
       ],
+      response_format: { type: "json_object" }
     });
 
     const responseContent = completion.choices[0]?.message?.content;
@@ -39,23 +37,18 @@ Write an engaging LinkedIn post based on that summary in ${tone} tone.
       throw new Error("No content received from OpenAI");
     }
 
-    // Extract summary using more precise regex
-    const summaryMatch = responseContent.match(/\[SUMMARY\]([\s\S]*?)\[\/SUMMARY\]/);
-    const summary = summaryMatch ? summaryMatch[1].trim() : '';
+    console.log('Raw OpenAI Response:', responseContent);
 
-    // Extract LinkedIn post using more precise regex
-    const linkedinMatch = responseContent.match(/\[LINKEDIN_POST\]([\s\S]*?)\[\/LINKEDIN_POST\]/);
-    const linkedinPost = linkedinMatch ? linkedinMatch[1].trim() : '';
+    const parsedResponse = JSON.parse(responseContent) as GenerateResponse;
 
-    if (!summary || !linkedinPost) {
-      console.error('Parsing failed. Response content:', responseContent);
-      throw new Error("Could not extract summary and LinkedIn post from response");
+    if (!parsedResponse.summary || !parsedResponse.linkedinPost) {
+      throw new Error("Missing required fields in OpenAI response");
     }
 
-    return { summary, linkedinPost };
+    return parsedResponse;
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-    console.error('OpenAI API Error:', error);
+    console.error('OpenAI API Error:', errorMessage);
     throw new Error(`Failed to generate LinkedIn post: ${errorMessage}`);
   }
 }
